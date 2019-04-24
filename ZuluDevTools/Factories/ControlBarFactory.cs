@@ -5,6 +5,7 @@ using Zulu;
 
 namespace ZuluDevTools.Factories
 {
+    public delegate IControlBar ControlBarHandler(string caption, int style);
     /// <summary>
     /// Предоставляет методы по созданию объектов типа IControlBar
     /// </summary>
@@ -17,14 +18,14 @@ namespace ZuluDevTools.Factories
         private const UInt32 DLGC_WANTCHARS = 0x0080;
         private const UInt32 WM_GETDLGCODE = 0x0087;
 
-        private readonly Func<string, int, IControlBar> _controlBarHandler;
+        private readonly ControlBarHandler _controlBarHandler;
         private const int WS_CHILD = 0x40000000,
                           WS_VISIBLE = 0x10000000;
         /// <summary>
         /// Предоставляет методы по созданию объектов типа IControlBar
         /// </summary>
         /// <param name="controlBarHandler">Функция по созданию объекта типа IControlBar</param>
-        public ControlBarFactory(Func<string, int, IControlBar> controlBarHandler)
+        public ControlBarFactory(ControlBarHandler controlBarHandler)
         {
             _controlBarHandler = controlBarHandler;
         }

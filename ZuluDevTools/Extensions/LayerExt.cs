@@ -1,9 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using ZuluLib;
 
 namespace ZuluDevTools.Extensions
 {
+    public delegate TDto LayerDtoHandler<TDto>(Layer layer) where TDto : class;
+    public delegate TDto ObjectTypeDtoHandler<TDto>(ObjectType objectType) where TDto : class;
+    public delegate TDto ElementDtoHandler<TDto>(Element element) where TDto : class;
+
     public static class LayerExt
     {
         /// <summary>
@@ -23,7 +26,7 @@ namespace ZuluDevTools.Extensions
         /// <param name="layers">Интерфейс, представляющий коллекцию слоев</param>
         /// <param name="activator">Конструктор объекта передачи данных</param>
         /// <returns></returns>
-        public static IEnumerable<TDto> ToEnumerable<TDto>(this Layers layers, Func<Layer, TDto> activator) where TDto : class
+        public static IEnumerable<TDto> ToEnumerable<TDto>(this Layers layers, LayerDtoHandler<TDto> activator) where TDto : class
         {
             for (short i = 1; i <= layers.Count; i++)
                 yield return activator(layers[i]);
@@ -47,7 +50,7 @@ namespace ZuluDevTools.Extensions
         /// <param name="layer">Интерфейс, представляющий тип слоя</param>
         /// <param name="activator">Конструктор объекта передачи данных</param>
         /// <returns></returns>
-        public static IEnumerable<TDto> FetchObjectTypes<TDto>(this Layer layer, Func<ObjectType, TDto> activator) where TDto : class
+        public static IEnumerable<TDto> FetchObjectTypes<TDto>(this Layer layer, ObjectTypeDtoHandler<TDto> activator) where TDto : class
         {
             ObjectTypes objectTypes = layer.ObjectTypes;
             
@@ -73,7 +76,7 @@ namespace ZuluDevTools.Extensions
         /// <param name="layer">Интерфейс, представляющий тип слоя</param>
         /// <param name="activator">Конструктор объекта передачи данных</param>
         /// <returns></returns>
-        public static IEnumerable<TDto> FetchElements<TDto>(this Layer layer, Func<Element, TDto> activator) where TDto : class
+        public static IEnumerable<TDto> FetchElements<TDto>(this Layer layer, ElementDtoHandler<TDto> activator) where TDto : class
         {
             Elements elements = layer.Elements;
 
