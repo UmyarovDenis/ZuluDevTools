@@ -5,6 +5,9 @@ using ZuluDevTools.Handlers.Core;
 
 namespace ZuluDevTools.Handlers
 {
+    /// <summary>
+    /// Предоставляет методы по регистрации обработчиков событий от системы Zulu
+    /// </summary>
     [ComVisible(true)]
     [ClassInterface(ClassInterfaceType.AutoDispatch)]
     public class HandlerProcessor : Registrator, IZuluEvents
@@ -17,6 +20,10 @@ namespace ZuluDevTools.Handlers
         {
             LoadModules(modules);
         }
+        /// <summary>
+        /// Возвращает экземпляр по шаблону Singleton
+        /// </summary>
+        /// <returns></returns>
         public static HandlerProcessor GetInstance()
         {
             if (_handlerProcessor == null)
@@ -24,6 +31,11 @@ namespace ZuluDevTools.Handlers
 
             return _handlerProcessor;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="modules">Загружаемые модули процессора, содержащие обработчики событий от системы Zulu</param>
+        /// <returns></returns>
         public static HandlerProcessor GetInstance(params ProcessorModule[] modules)
         {
             if (_handlerProcessor == null)
@@ -41,6 +53,14 @@ namespace ZuluDevTools.Handlers
 
             return _handlerProcessor;
         }
+        /// <summary>
+        /// Выполняет обработку поступившего события
+        /// </summary>
+        /// <param name="EventID">Код события из набора констант eZuluEvents</param>
+        /// <param name="Source">Объект-источник события</param>
+        /// <param name="Param1">Дополнительный параметр 1</param>
+        /// <param name="Param2">Дополнительный параметр 2</param>
+        /// <param name="Param3">Дополнительный параметр 3</param>
         public void OnZuluEvent(int EventID, object Source, object Param1, object Param2, object Param3)
         {
             try
@@ -56,6 +76,10 @@ namespace ZuluDevTools.Handlers
                 throw;
             }
         }
+        /// <summary>
+        /// Выполняет загрузку модулей, содержащих обработчики событий от системы Zulu
+        /// </summary>
+        /// <param name="modules">Загружаемые модули процессора, содержащие обработчики событий от системы Zulu</param>
         public void LoadModules(params ProcessorModule[] modules)
         {
             foreach (ProcessorModule module in modules)

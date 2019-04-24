@@ -5,8 +5,9 @@ using Zulu;
 
 namespace ZuluDevTools.Factories
 {
-    public delegate IControlBar ControlBarHandler(string caption, int style);
-
+    /// <summary>
+    /// Предоставляет методы по созданию объектов типа IControlBar
+    /// </summary>
     public class ControlBarFactory
     {
         private const UInt32 DLGC_WANTARROWS = 0x0001;
@@ -16,13 +17,26 @@ namespace ZuluDevTools.Factories
         private const UInt32 DLGC_WANTCHARS = 0x0080;
         private const UInt32 WM_GETDLGCODE = 0x0087;
 
-        private readonly ControlBarHandler _controlBarHandler;
+        private readonly Func<string, int, IControlBar> _controlBarHandler;
         private const int WS_CHILD = 0x40000000,
                           WS_VISIBLE = 0x10000000;
-        public ControlBarFactory(ControlBarHandler controlBarHandler)
+        /// <summary>
+        /// Предоставляет методы по созданию объектов типа IControlBar
+        /// </summary>
+        /// <param name="controlBarHandler">Функция по созданию объекта типа IControlBar</param>
+        public ControlBarFactory(Func<string, int, IControlBar> controlBarHandler)
         {
             _controlBarHandler = controlBarHandler;
         }
+        /// <summary>
+        /// Создает представление по шаблону MVVM и внедряет его в докируемую панель
+        /// </summary>
+        /// <typeparam name="TView">Тип представления</typeparam>
+        /// <typeparam name="TViewModel">Тип контекста данных</typeparam>
+        /// <param name="caption">Заголовок окна</param>
+        /// <param name="styles">Стиль окна</param>
+        /// <param name="viewModelArgs">Параметры контекста данных</param>
+        /// <returns></returns>
         public IControlBar Create<TView, TViewModel>(string caption, int styles, params object[] viewModelArgs)
             where TView : FrameworkElement
             where TViewModel : class
@@ -32,6 +46,13 @@ namespace ZuluDevTools.Factories
 
             return Create(view, caption, styles);
         }
+        /// <summary>
+        /// Внедряет представление в докируемую панель
+        /// </summary>
+        /// <param name="view">Тип представления</param>
+        /// <param name="caption">Заголовок окна</param>
+        /// <param name="style">Стиль окна</param>
+        /// <returns></returns>
         public IControlBar Create(FrameworkElement view, string caption, int style)
         {
             try

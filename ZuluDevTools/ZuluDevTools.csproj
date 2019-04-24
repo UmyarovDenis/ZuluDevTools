@@ -62,6 +62,11 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Annotations\DataBases\FieldDisplayNameAttribute.cs" />
+    <Compile Include="Annotations\DataBases\FieldInfoAttribute.cs" />
+    <Compile Include="Annotations\DataBases\TableLinkAttribute.cs" />
+    <Compile Include="Annotations\DataBases\TableNameAttribute.cs" />
+    <Compile Include="Extensions\LayerExt.cs" />
     <Compile Include="Factories\ControlBarFactory.cs" />
     <Compile Include="Handlers\Core\Registrator.cs" />
     <Compile Include="Handlers\HandlerProcessor.cs" />
