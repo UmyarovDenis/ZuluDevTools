@@ -1,4 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using System.Threading.Tasks;
+using ZB;
 using ZuluLib;
 
 namespace ZuluDevTools.Extensions
@@ -82,6 +87,110 @@ namespace ZuluDevTools.Extensions
 
             for (int i = 0; i < elements.Count; i++)
                 yield return activator(elements.GetElement(i));
+        }
+        /// <summary>
+        /// Выполняет SQL запрос в контексте слоя и выозвращает набор данных
+        /// </summary>
+        /// <param name="layer">Интерфейс, представляющий тип слоя</param>
+        /// <param name="sqlExpression">SQL запрос</param>
+        /// <returns></returns>
+        public static DataTable ExecuteSQL(this Layer layer, string sqlExpression, string tableName, object context = null)
+        {
+            IZSqlResult result = null;
+
+            if(context != null)
+            {
+                result = layer.ExecSQL(sqlExpression, context);
+            }
+            else
+            {
+                result = layer.ExecSQL(sqlExpression);
+            }
+
+            if (result.RetCode != 0)
+                throw new InvalidOperationException(string.Format("Error code: {0}\nError message: {1}"
+                    , result.RetCode, result.ErrorString));
+
+            IZbDataset dataSet = (IZbDataset)result.DataSet;
+
+            DataTable dataTable = new DataTable(!string.IsNullOrEmpty(tableName) ? tableName : "Результат запроса");
+
+            dataSet.MoveFirst();
+            for(int i = 0; i < dataSet.FieldCount; i++)
+            {
+                dataTable.Columns.Add(new DataColumn($"{dataSet.GetFieldDef(i).Name}"));
+            }
+
+            dataSet.MoveFirst();
+            while(dataSet.Eof != true)
+            {
+                object[] values = new object[dataSet.FieldCount];
+                for(int i = 0; i < values.Length; i++)
+                {
+                    values[i] = dataSet.FieldValue[i];
+                }
+
+                dataTable.Rows.Add(values);
+                dataSet.MoveNext();
+            }
+
+            return dataTable;
+        }
+        /// <summary>
+        /// Упаковывает слой в заданный каталог
+        /// </summary>
+        /// <param name="layer">Интерфейс, представляющий тип слоя</param>
+        /// <param name="destinationFolder">Каталог</param>
+        /// <param name="layerPackName">Имя архива (расширение *.zpkg может быть опущено)</param>
+        /// <returns></returns>
+        public static bool PackLayer(this Layer layer, string destinationFolder, string layerPackName = null)
+        {
+            string packExtension = ".zpkg";
+            string packageName = string.IsNullOrEmpty(layerPackName) ? string.Concat(layer.UserName, packExtension) :
+                    !layerPackName.Contains(packExtension) ? string.Concat(layerPackName, packExtension) : layerPackName;
+
+            FileInfo fileInfo = new FileInfo(Path.Combine(destinationFolder, packageName));
+
+            if (!fileInfo.Directory.Exists)
+            {
+                Directory.CreateDirectory(destinationFolder);
+            }
+
+            ZuluToolsClass zuluTools = new ZuluToolsClass();
+
+            return zuluTools.LayerPack(layer.Name, fileInfo.FullName, 0);
+        }
+        /// <summary>
+        /// Асинхронно упаковывает слой в заданный каталог
+        /// </summary>
+        /// <param name="layer">Интерфейс, представляющий тип слоя</param>
+        /// <param name="destinationFolder">Каталог</param>
+        /// <param name="layerPackName">Имя архива (расширение *.zpkg может быть опущено)</param>
+        /// <returns></returns>
+        public static async Task<bool> PackLayerAsync(this Layer layer, string destinationFolder, string layerPackName = null)
+        {
+            return await Task.Run(() => PackLayer(layer, destinationFolder, layerPackName));
+        }
+        /// <summary>
+        /// Упаковывает все слои загруженные в карту (имя каждого архива слоя задается в соответствии с пользовательским именем)
+        /// </summary>
+        /// <param name="layers">Интерфейс, представляющий коллекцию слоев</param>
+        /// <param name="destinationFolder">Каталог</param>
+        public static void PackLayers(this Layers layers, string destinationFolder)
+        {
+            for(short i = 1; i <= layers.Count; i++)
+            {
+                PackLayer(layers[i], destinationFolder);
+            }
+        }
+        /// <summary>
+        /// Асинхронно упаковывает все слои загруженные в карту (имя каждого архива слоя задается в соответствии с пользовательским именем)
+        /// </summary>
+        /// <param name="layers">Интерфейс, представляющий коллекцию слоев</param>
+        /// <param name="destinationFolder">Каталог</param>
+        public static async void PackLayersAsync(this Layers layers, string destinationFolder)
+        {
+            await Task.Run(() => PackLayers(layers, destinationFolder));
         }
     }
 }
